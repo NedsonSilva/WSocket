@@ -1,7 +1,6 @@
 import NodeCache from '@cacheable/node-cache'
 import { Boom } from '@hapi/boom'
 import { randomBytes } from 'crypto'
-import Long = require('long')
 import { proto } from '../../WAProto'
 import { DEFAULT_CACHE_TTLS, KEY_BUNDLE_TYPE, MIN_PREKEY_COUNT } from '../Defaults'
 import {
@@ -58,6 +57,7 @@ import {
 } from '../WABinary'
 import { extractGroupMetadata } from './groups'
 import { makeMessagesSocket } from './messages-send'
+import Long = require('long')
 
 
 export const makeMessagesRecvSocket = (config: SocketConfig) => {
@@ -867,7 +867,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 					cleanMessage(msg, authState.creds.me!.id)
 
-					await sendMessageAck(node)
+					// await sendMessageAck(node)
 
 					await upsertMessage(msg, node.attrs.offline ? 'append' : 'notify')
 				})
