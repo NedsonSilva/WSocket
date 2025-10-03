@@ -59,7 +59,6 @@ import { extractGroupMetadata } from './groups'
 import { makeMessagesSocket } from './messages-send'
 import Long = require('long')
 
-
 export const makeMessagesRecvSocket = (config: SocketConfig) => {
 	const { logger, retryRequestDelayMs, maxMsgRetryCount, getMessage, shouldIgnoreJid } = config
 	const sock = makeMessagesSocket(config)
@@ -618,14 +617,13 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		for (const [i, msg] of msgs.entries()) {
 			if (msg) {
 				updateSendMessageAgainCount(ids[i], participant)
-				const msgRelayOpts: MessageRelayOptions = { messageId: ids[i], isretry:true }				
-					msgRelayOpts.participant = {
-						jid: participant,
-						count: +retryNode.attrs.count					
-					
+				const msgRelayOpts: MessageRelayOptions = { messageId: ids[i], isretry: true }
+				msgRelayOpts.participant = {
+					jid: participant,
+					count: +retryNode.attrs.count
 				}
 
-				await relayMessage(key.remoteJid!, msg, msgRelayOpts,)
+				await relayMessage(key.remoteJid!, msg, msgRelayOpts)
 			} else {
 				logger.debug({ jid: key.remoteJid, id: ids[i] }, 'recv retry request, but message not available')
 			}
@@ -760,7 +758,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 	const handleMessage = async (node: BinaryNode) => {
 		if (shouldIgnoreJid(node.attrs.from) && node.attrs.from !== '@s.whatsapp.net') {
 			logger.debug({ key: node.attrs.key }, 'ignored message')
-			await sendMessageAck(node)
+			// await sendMessageAck(node)
 			return
 		}
 
@@ -769,7 +767,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		// TODO: temporary fix for crashes and issues resulting of failed msmsg decryption
 		if (encNode && encNode.attrs.type === 'msmsg') {
 			logger.debug({ key: node.attrs.key }, 'ignored msmsg')
-			await sendMessageAck(node)
+			// await sendMessageAck(node)
 			return
 		}
 
@@ -945,15 +943,12 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		const callId = infoChild.attrs['call-id']
 		const from = infoChild.attrs.from || infoChild.attrs['call-creator']
 		status = getCallStatusFromNode(infoChild)
-		if(isLidUser(from) && infoChild.tag==='relaylatency')
-		{
-			const verify = callOfferCache.get(callId);
-			if(!verify)
-			{
-				status = 'offer';
-				callOfferCache.set(callId,true);
+		if (isLidUser(from) && infoChild.tag === 'relaylatency') {
+			const verify = callOfferCache.get(callId)
+			if (!verify) {
+				status = 'offer'
+				callOfferCache.set(callId, true)
 			}
-
 		}
 		const call: WACallEvent = {
 			chatId: attrs.from,
@@ -982,9 +977,8 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		// delete data once call has ended
 		if (status === 'reject' || status === 'accept' || status === 'timeout' || status === 'terminate') {
 			callOfferCache.del(call.id)
-			if(isLidUser(from))
-			{
-			 callOfferCache.del(from)	
+			if (isLidUser(from)) {
+				callOfferCache.del(from)
 			}
 		}
 
